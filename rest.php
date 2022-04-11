@@ -17,8 +17,6 @@ class Rest {
      * @var array
      */
     public $get_input = array();
-
-    public $_request = array();
     
     /**
      * Envio de datos
@@ -44,6 +42,7 @@ class Rest {
      */
     private $_code = 200;
 
+   
     public function __construct(){
 
         $this->_type_request= $_SERVER['CONTENT_TYPE'];
@@ -51,18 +50,29 @@ class Rest {
 
     }
 
-    public function get_request_method(){
-        
+    public function get_request(){
         return $_SERVER['REQUEST_METHOD'];
+    }
+
+    public function getSatus()
+    {
+       $status = array(
+            200 => 'OK',
+            201 => 'Created',  
+            204 => 'No Content',  
+            404 => 'Not Found',  
+            406 => 'Not Acceptable'
+        );
+
+       return $status[$this->_code] ?? $status[500]; 
     }
 
     private function inputs()
     {   
-        $this->_method_request = $this->get_request_method();
+        $this->_method_request = $this->get_request();
 
         switch ($this->_method_request) {
             case 'POST': 
-
                 $this->get_input = $this->getInputs($_POST);
                 break;
 
@@ -90,40 +100,38 @@ class Rest {
     public function getInputs($data)
     {
         // Contiene datos
-        $variable = array();
-           
-        if ($this->_type_request== "application/json") {
+        $inputs = array();
+        
+        if (is_array($data)) {
+            if ($this->_type_request== "application/json") {
 
-            $json = file_get_contents('php://input');
-
-            $variable = json_decode($json, true);
-            # code...
-        } else {
-
-            if (is_array($data)) {
+                $json = file_get_contents('php://input');
+                $inputs = json_decode($json, true);
+                # code...
+            } else {
 
                 foreach ($data as $key => $value) {
-                    $variable[$key] = $value;
+                    $inputs[$key] = $value;
                 }
+            }
+        } 
 
-            } 
-        }
 
-        $this->_request = array('statusrecibe' => "Success", "methodrecibe" => $this->_method_request, "tiporequest"=>$this->_type_request, "data" => $variable);
+        $this->_request = array('statusrecibe' => "Success", "methodrecibe" => $this->_method_request, "tiporequest"=>$this->_type_request, "data" => $inputs);
 
-        return $variable;
+        return $inputs;
     }
 
-
+    public function set_header($value='')
+    {
+        header("HTTP/1.1 ".$this->_code." ".$this->getSatus());
+        header("Content-Type:".$this->contenide_type);
+        header('Access-Control-Allow-Origin: *'); 
+    }
     
-
     
 }
 
-
-//
-
-//$arrayName = array('name' =>  "David", 'last' => "Perez" );
-
-//$new->getInputs($arrayName);
+$r = new Rest();
+echo($r->getSatus());
 
