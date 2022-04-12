@@ -7,10 +7,10 @@ class Api extends Rest
 {
 
 	private $host = "127.0.0.1";
-    private $username = "root";
-    private $password = "";
-    private $database = "productos";
-    
+	private $username = "root";
+	private $password = "";
+	private $database = "productos";
+	
     /**
      * Simulación de como se recogeran los datos
      * @var array
@@ -27,156 +27,156 @@ class Api extends Rest
      * Conexión a la base de datos
      * @var [type]
      */
-	private $connection;
+    private $connection;
     
     /**
      * Table base de datos
      * @var string
      */
-	private $table = "producto";
+    private $table = "producto";
 
-	function __construct()
-	{   
-		parent::__construct();
-		$this->dbConnect();	
-	}
+    function __construct()
+    {   
+    	parent::__construct();
+    	$this->dbConnect();	
+    }
 
-	private function dbConnect()
-	{
+    private function dbConnect()
+    {
 
-		$this->connection = null;
+    	$this->connection = null;
 
-		try {
+    	try {
 
-			$this->connection = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->database, $this->username, $this->password);
+    		$this->connection = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->database, $this->username, $this->password);
 
-		} catch (PDOException $e) {
+    	} catch (PDOException $e) {
 
-			echo "Error: " . $e->getMessage();
-		}
-	}
+    		echo "Error: " . $e->getMessage();
+    	}
+    }
 
-	public function resquest()		
-	{
-		$this->_data_response = array('status' => "", "method" => "", "tiporequest"=>'',"responsedata"=> $this->responsedata, "dataRecibida" => $this->_request);
+    public function resquest()		
+    {
+    	$this->_data_response = array('status' => "", "method" => "", "tiporequest"=>'',"responsedata"=> $this->responsedata, "dataRecibida" => $this->_request);
 
-		echo json_encode($this->_data_response);
+    	echo json_encode($this->_data_response);
 	    //print_r($this->get_input);
-	}
+    }
 
-	public function login(){}
+    public function login(){}
 
-	public function session(){}
+    public function session(){}
     
-	public function products(){
+    public function products(){
 
-        $result = $this->connection->prepare('SELECT * FROM '.$this->table.'');
+    	$result = $this->connection->prepare('SELECT * FROM '.$this->table.'');
 
-        $result->execute();
+    	$result->execute();
 
 
-        $num_rowse = $result->rowCount();
+    	$num_rowse = $result->rowCount();
 
-        if ($num_rowse>0) {
+    	if ($num_rowse>0) {
 
-        	while($row = $result->fetch(PDO::FETCH_ASSOC)){
-        		$this->responsedata[] = $row; 
-        	}
-        }
+    		while($row = $result->fetch(PDO::FETCH_ASSOC)){
+    			$this->responsedata[] = $row; 
+    		}
+    	}
 
-	    $this->resquest();
-	}
-	
-	public function product(){
+    	$this->resquest();
+    }
+    
+    public function product(){
 
-		$result = $this->connection->prepare('SELECT * FROM '.$this->table.' WHERE id = 1');
+    	$result = $this->connection->prepare('SELECT * FROM '.$this->table.' WHERE id = 1');
 
-		$result->execute();
+    	$result->execute();
 
-		$num_rowse = $result->rowCount();
+    	$num_rowse = $result->rowCount();
 
-		if ($num_rowse>0) {
+    	if ($num_rowse>0) {
 
-			while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-				$this->responsedata[] = $row;
-			}
-		}
+    		while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+    			$this->responsedata[] = $row;
+    		}
+    	}
 
-		$this->resquest();
-	}
+    	$this->resquest();
+    }
 
-	public function productInsert()
-	{   
+    public function productInsert()
+    {   
 
-		$arrayCampos = array();
-        $arrayValues = array();
-        $lugares = array();
+    	$arrayCampos = array();
+    	$arrayValues = array();
+    	$lugares = array();
 
-        foreach ($this->_db_cliente as $key => $value) {
-            $arrayCampos[] = $key;
-            $lugares[] = "?";
-            $arrayValues[] = $value;
-        }
+    	foreach ($this->_db_cliente as $key => $value) {
+    		$arrayCampos[] = $key;
+    		$lugares[] = "?";
+    		$arrayValues[] = $value;
+    	}
 
-        $result = $this->connection->prepare('INSERT INTO '.$this->table.'('.implode(',', $arrayCampos).') VALUES ('.implode(',', $lugares).')');
+    	$result = $this->connection->prepare('INSERT INTO '.$this->table.'('.implode(',', $arrayCampos).') VALUES ('.implode(',', $lugares).')');
 
-        $result->execute($arrayValues);
+    	$result->execute($arrayValues);
 
-		$this->responsedata = array('functiom' => "productInsert", "dateUpdate"=>"DSF");
-		$this->resquest();
-	}
+    	$this->responsedata = array('functiom' => "productInsert", "dateUpdate"=>"DSF");
+    	$this->resquest();
+    }
 
-	public function productUpdate(){
+    public function productUpdate(){
 
-		$arrayCampos = array();
-        $arrayValues = array();
+    	$arrayCampos = array();
+    	$arrayValues = array();
 
-		foreach ($this->_db_cliente as $key => $value) {
+    	foreach ($this->_db_cliente as $key => $value) {
 
-            $arrayCampos[] = "$key=?";
-            $arrayValues[] = $value;
+    		$arrayCampos[] = "$key=?";
+    		$arrayValues[] = $value;
 
-        }
-        
-        try {
+    	}
+    	
+    	try {
 
-        	$result = $this->connection->prepare('UPDATE '.$this->table.'  SET '.implode(',', $arrayCampos).' where id=1');
+    		$result = $this->connection->prepare('UPDATE '.$this->table.'  SET '.implode(',', $arrayCampos).' where id=1');
 
-			$result->execute($arrayValues);
+    		$result->execute($arrayValues);
 
-			$this->responsedata = array('functiom' => "productUpdate", "dateUpdate"=>"DSF");
+    		$this->responsedata = array('functiom' => "productUpdate", "dateUpdate"=>"DSF");
 
-			$this->resquest();
+    		$this->resquest();
 
-        } catch (PDOException $e) {
+    	} catch (PDOException $e) {
 
-        	echo "Error: " . $e->getMessage();
+    		echo "Error: " . $e->getMessage();
 
-        }
-		
-		
-	}
+    	}
+    	
+    	
+    }
 
-	public function productDelete(){
+    public function productDelete(){
 
-		$this->responsedata = array('functiom' => "productDelete", "dateUpdate"=>"DSF");
-		$this->resquest();
-	}
+    	$this->responsedata = array('functiom' => "productDelete", "dateUpdate"=>"DSF");
+    	$this->resquest();
+    }
 
-	public function productImagen()
-	{   
-		
-	}
+    public function productImagen()
+    {   
+    	
+    }
 
-	public function initialApi(){
+    public function initialApi(){
 
-		$func = strtolower(trim(str_replace("/","",$_REQUEST['x'])));
-		$funcd = strtolower(trim(str_replace("/","",$_REQUEST['d'])));
-		
-		echo $func."</br>";
+    	$func = strtolower(trim(str_replace("/","",$_REQUEST['x'])));
+    	$funcd = strtolower(trim(str_replace("/","",$_REQUEST['d'])));
+    	
+    	echo $func."</br>";
 
-		echo $funcd;
-	}/**/
+    	echo $funcd;
+    }/**/
     
 }
 
